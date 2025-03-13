@@ -1,16 +1,16 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
   const regularWorkingTimeInput = document.getElementById('setWorkingTimePerDay');
   const workingTimeTitleInput = document.getElementById('setWorkingTimeTitle');
 
   // 保存された値を取得して入力フィールドに設定
-  chrome.storage.sync.get(['regularWorkTime'], function(result) {
+  chrome.storage.sync.get(['regularWorkTime'], (result) => {
     if (result.regularWorkTime) {
-        regularWorkingTimeInput.value = result.regularWorkTime;
+      regularWorkingTimeInput.value = result.regularWorkTime;
     }
   });
-  chrome.storage.sync.get(['WorkTimeTitle'], function(result) {
+  chrome.storage.sync.get(['WorkTimeTitle'], (result) => {
     if (result.WorkTimeTitle) {
-        workingTimeTitleInput.value = result.WorkTimeTitle;
+      workingTimeTitleInput.value = result.WorkTimeTitle;
     }
   });
 
@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 設定を保存
   document.getElementById('changeSettings').addEventListener('click', () => {
-    if(regularWorkingTimeInput.value != null && regularWorkingTimeInput.value !== ''){
+    if (regularWorkingTimeInput.value != null && regularWorkingTimeInput.value !== '') {
       const match = regularWorkingTimeInput.value.trim().match(/^([-+]?)(\d+)\.(\d\d)$/);
       if (!match) {
         alert('労働時間は「8.00」や「8.30」のような形式で入力してください。');

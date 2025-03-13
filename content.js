@@ -15,11 +15,11 @@ class Time {
   static fromString(timeString = '-0.00') {
     const match = timeString.trim().match(/^([-+]?)(\d+)\.(\d+)$/);
     if (!match) {
-      throw new Error('Invalid time format. Expected format is "+/-H.MM"' + timeString);
+      throw new Error(`Invalid time format. Expected format is "+/-H.MM"${timeString}`);
     }
     const [_, sign, hour, minute] = match;
     const result = parseInt(hour) * 60 + parseInt(minute);
-    if(sign === '-') return new Time(-1 * result);
+    if (sign === '-') return new Time(-1 * result);
     else return new Time(result);
   }
 
@@ -48,7 +48,7 @@ class Time {
 
 // 日数を扱うクラス(基本的に[10や10.0や0.5]などの形式を扱うため文字列で扱う)
 // 小数点第1桁までを扱う
-class Days{
+class Days {
   // 日数を指定してDayを作成
   constructor(day = '0.0') {
     // 小数点が含まれていない場合、.0を追加
@@ -68,7 +68,7 @@ class Days{
 
   // 日数を整数で取得
   getDays() {
-    if(this.getDecimalPart() !== 0) throw new Error('小数部分があるため整数に変換できません');
+    if (this.getDecimalPart() !== 0) throw new Error('小数部分があるため整数に変換できません');
     return this.getIntegerPart();
   }
 
@@ -140,13 +140,13 @@ async function getRegularWorkTimePerDay() {
 }
 
 // 残業時間を取得
-async function getOverWorkTime(regularWorkTimePerDay = new Time(0)){
+async function getOverWorkTime(regularWorkTimePerDay = new Time(0)) {
   let amountOfOvertime = new Time(0); // 残業時間
   const workTimes = await getWorkTime();
-  if(workTimes.length > 0){
-    workTimes.forEach((workTime) => {
+  if (workTimes.length > 0) {
+    for (const workTime of workTimes) {
       amountOfOvertime = amountOfOvertime.plus(workTime.minus(regularWorkTimePerDay));
-    });
+    }
   }
   return amountOfOvertime;
 }
@@ -154,11 +154,11 @@ async function getOverWorkTime(regularWorkTimePerDay = new Time(0)){
 // ======================================== 要素を取得する関数 ========================================
 
 // NOTE 基本基準時間を取得（現在は未使用）
-function getRegularWorkTime(){
+function getRegularWorkTime() {
   const regularWorkTimeElement = document.querySelector('.specific-table_800 tbody td.custom1');
   if (regularWorkTimeElement) {
     const regularWorkTimeText = regularWorkTimeElement.textContent.trim();
-    if(regularWorkTimeText === ''){
+    if (regularWorkTimeText === '') {
       console.log('基本労働時間が見つかりませんでした。')
       return null;
     }
@@ -170,7 +170,7 @@ function getRegularWorkTime(){
 }
 
 // 労働日数を取得(平日から取得)
-function getWorkCount(){
+function getWorkCount() {
   const workCountElement = document.querySelector('.specific-daysCount_1 li > div.work_count');
   if (workCountElement) {
     const workCountDays = new Days(workCountElement.textContent);
@@ -182,7 +182,7 @@ function getWorkCount(){
 }
 
 // 有給休暇日数を取得(小数)
-function getPaidHolidayCount(){
+function getPaidHolidayCount() {
   // "有休"のラベルを持つli要素を選択
   const listItem = Array.from(document.querySelectorAll('.specific-daysCount_1 li')).find(item => {
     const label = item.querySelector('label.holiday_count');
@@ -195,7 +195,7 @@ function getPaidHolidayCount(){
     const valueText = valueDiv ? valueDiv.textContent.trim() : '';
     const valueMatch = valueText.match(/^\d+(\.\d+)?/);
     const value = valueMatch ? new Days(valueMatch[0]) : '値が見つかりません';
-    if(value === '値が見つかりません') console.log('有給休暇日数が見つかりませんでした。');
+    if (value === '値が見つかりません') console.log('有給休暇日数が見つかりませんでした。');
     return value;
   } else {
     console.log('有給休暇日数が見つかりませんでした。');
@@ -204,13 +204,13 @@ function getPaidHolidayCount(){
 }
 
 // 働いた日の労働時間を取得
-async function getWorkTime(){
+async function getWorkTime() {
   // 設定値を取得
   let workTimeTitle = '労働合計';
-  try{
+  try {
     value = await chrome.storage.sync.get(['WorkTimeTitle']);
     workTimeTitle = value.WorkTimeTitle;
-    if(workTimeTitle === '' || workTimeTitle == null){
+    if (workTimeTitle === '' || workTimeTitle == null) {
       workTimeTitle = '労働合計';
     }
   } catch (error) {
@@ -223,14 +223,14 @@ async function getWorkTime(){
     const lebel = possibleHeader.querySelector('p').textContent;
     // <br />タグを削除する
     const lebelWithoutBr = lebel.replace(/\s*<br\s*\/?>\s*/gi, '').trim();
-    if(lebelWithoutBr === workTimeTitle) return true;
+    if (lebelWithoutBr === workTimeTitle) return true;
   });
-  if(!workTimeHeaderElement){
+  if (!workTimeHeaderElement) {
     console.log(`列が見つかりませんでした。タイトル:${workTimeTitle}`);
     return null;
   }
   const workTimeClass = workTimeHeaderElement.className.split(' ')[0];
-  if(!workTimeClass){
+  if (!workTimeClass) {
     console.log('労働時間の列が見つかりませんでした。');
     return null;
   }
@@ -238,10 +238,10 @@ async function getWorkTime(){
   // 労働時間を取得
   const arrayOfWorkTime = []; // 労働時間の配列
   const workTimeElements = document.querySelectorAll(`.htBlock-adjastableTableF tbody td.${workTimeClass} > p`);
-  if(workTimeElements.length > 0){
+  if (workTimeElements.length > 0) {
     workTimeElements.forEach((workTimeElement) => {
       const workTimeText = workTimeElement.textContent;
-      try{
+      try {
         arrayOfWorkTime.push(Time.fromString(workTimeText));
       } catch (e) {
         return;
